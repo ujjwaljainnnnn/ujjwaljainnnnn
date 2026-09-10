@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Gauge } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Gauge, Cpu } from "lucide-react";
 import type { AnalysisResult } from "@/lib/types";
 import { formatUsd, cn } from "@/lib/utils";
 
@@ -48,6 +48,11 @@ export default function AnalysisCard({ result }: AnalysisCardProps) {
       </div>
 
       <p className="text-sm leading-relaxed text-white/60">{result.reasoning}</p>
+
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-white/30">
+        <Cpu className="h-3 w-3" />
+        Analyzed by {result.model_used}
+      </div>
 
       <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
         <div>

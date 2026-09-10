@@ -9,6 +9,8 @@ export interface Candle {
 
 export type Direction = "UP" | "DOWN" | "NEUTRAL";
 
+export type AIProvider = "anthropic" | "openai";
+
 export interface AnalysisResult {
   direction: Direction;
   confidence: number; // 0-100
@@ -19,6 +21,7 @@ export interface AnalysisResult {
   is_positive_ev: boolean;
   bet_amount: number;
   payout_pct: number;
+  model_used: string;
 }
 
 export interface AnalyzeRequestPayload {
@@ -26,6 +29,7 @@ export interface AnalyzeRequestPayload {
   candles: Candle[];
   bet_amount: number;
   payout_pct: number;
+  provider: AIProvider;
 }
 
 export type TradeStatus = "idle" | "pending" | "won" | "lost";

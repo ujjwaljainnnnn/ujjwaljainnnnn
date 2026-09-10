@@ -37,7 +37,7 @@ async def health() -> dict:
 @app.post("/api/analyze", response_model=AnalysisResponse)
 async def analyze(request: AnalyzeRequest) -> AnalysisResponse:
     try:
-        raw = await get_ai_analysis(request.symbol, request.candles)
+        raw = await get_ai_analysis(request.symbol, request.candles, request.provider)
     except ValidationError as exc:
         logger.error("AI response failed validation: %s", exc)
         raise HTTPException(status_code=502, detail="AI engine returned a malformed response")
@@ -59,4 +59,5 @@ async def analyze(request: AnalyzeRequest) -> AnalysisResponse:
         is_positive_ev=expected_value > 0 and raw.direction != Direction.NEUTRAL,
         bet_amount=request.bet_amount,
         payout_pct=request.payout_pct,
+        model_used=raw.model_used,
     )

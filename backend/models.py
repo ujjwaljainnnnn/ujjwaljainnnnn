@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from typing import List
 
@@ -8,6 +9,11 @@ class Direction(str, Enum):
     UP = "UP"
     DOWN = "DOWN"
     NEUTRAL = "NEUTRAL"
+
+
+class AIProvider(str, Enum):
+    ANTHROPIC = "anthropic"
+    OPENAI = "openai"
 
 
 class Candle(BaseModel):
@@ -24,6 +30,9 @@ class AnalyzeRequest(BaseModel):
     candles: List[Candle]
     bet_amount: float = Field(gt=0, le=500)
     payout_pct: float = Field(ge=70, le=95)
+    provider: AIProvider = Field(
+        default_factory=lambda: AIProvider(os.getenv("AI_PROVIDER", "anthropic").lower())
+    )
 
     @field_validator("candles")
     @classmethod
@@ -45,6 +54,7 @@ class AnalysisResponse(BaseModel):
     is_positive_ev: bool
     bet_amount: float
     payout_pct: float
+    model_used: str
 
 
 class RawAIAnalysis(BaseModel):
@@ -54,3 +64,4 @@ class RawAIAnalysis(BaseModel):
     confidence: float = Field(ge=0, le=100)
     pattern_detected: str
     reasoning: str
+    model_used: str = "Heuristic Engine"

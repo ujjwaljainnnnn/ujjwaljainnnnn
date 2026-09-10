@@ -3,15 +3,20 @@ import logging
 import os
 from typing import List
 
-from models import Candle, Direction, RawAIAnalysis
+from models import AIProvider, Candle, Direction, RawAIAnalysis
 
 logger = logging.getLogger("copilot.ai_engine")
 
-AI_PROVIDER = os.getenv("AI_PROVIDER", "anthropic").lower()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+MODEL_LABELS = {
+    AIProvider.ANTHROPIC: f"Claude ({ANTHROPIC_MODEL})",
+    AIProvider.OPENAI: f"GPT ({OPENAI_MODEL})",
+}
+HEURISTIC_LABEL = "Heuristic Engine (offline)"
 
 SYSTEM_PROMPT = """You are an expert technical analyst embedded in an educational trading \
 copilot. You are given the last N one-minute OHLCV candles for a crypto pair. Analyze the \
@@ -160,26 +165,32 @@ def _heuristic_analysis(candles: List[Candle]) -> RawAIAnalysis:
         confidence=round(confidence, 1),
         pattern_detected=pattern,
         reasoning=reasoning,
+        model_used=HEURISTIC_LABEL,
     )
 
 
-async def get_ai_analysis(symbol: str, candles: List[Candle]) -> RawAIAnalysis:
-    has_key = (AI_PROVIDER == "anthropic" and ANTHROPIC_API_KEY) or (
-        AI_PROVIDER == "openai" and OPENAI_API_KEY
+async def get_ai_analysis(
+    symbol: str, candles: List[Candle], provider: AIProvider
+) -> RawAIAnalysis:
+    has_key = (provider == AIProvider.ANTHROPIC and ANTHROPIC_API_KEY) or (
+        provider == AIProvider.OPENAI and OPENAI_API_KEY
     )
 
     if not has_key:
-        logger.info("No %s API key configured; using heuristic fallback analyzer.", AI_PROVIDER)
+        logger.info("No %s API key configured; using heuristic fallback analyzer.", provider.value)
         return _heuristic_analysis(candles)
 
     prompt = format_candles_prompt(symbol, candles)
 
     try:
-        if AI_PROVIDER == "openai":
+        if provider == AIProvider.OPENAI:
             raw = await _call_openai(prompt)
         else:
             raw = await _call_anthropic(prompt)
+        raw["model_used"] = MODEL_LABELS[provider]
         return RawAIAnalysis(**raw)
     except Exception:
-        logger.exception("LLM analysis call failed; falling back to heuristic analyzer.")
+        logger.exception(
+            "%s analysis call failed; falling back to heuristic analyzer.", provider.value
+        )
         return _heuristic_analysis(candles)

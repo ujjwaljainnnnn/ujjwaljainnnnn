@@ -5,7 +5,8 @@ import { ScanLine, Rocket, Loader2 } from "lucide-react";
 import BetControls from "./BetControls";
 import AnalysisCard from "./AnalysisCard";
 import ActiveTradeCard from "./ActiveTradeCard";
-import type { AnalysisResult, DemoTrade } from "@/lib/types";
+import ModelSwitcher from "./ModelSwitcher";
+import type { AIProvider, AnalysisResult, DemoTrade } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface CopilotPanelProps {
@@ -13,6 +14,8 @@ interface CopilotPanelProps {
   onBetAmountChange: (v: number) => void;
   payoutPct: number;
   onPayoutPctChange: (v: number) => void;
+  provider: AIProvider;
+  onProviderChange: (p: AIProvider) => void;
   analyzing: boolean;
   onAnalyze: () => void;
   result: AnalysisResult | null;
@@ -27,6 +30,8 @@ export default function CopilotPanel({
   onBetAmountChange,
   payoutPct,
   onPayoutPctChange,
+  provider,
+  onProviderChange,
   analyzing,
   onAnalyze,
   result,
@@ -46,6 +51,12 @@ export default function CopilotPanel({
           </div>
           <h2 className="text-sm font-semibold tracking-tight">AI Copilot Console</h2>
         </div>
+
+        <ModelSwitcher
+          provider={provider}
+          onChange={onProviderChange}
+          disabled={analyzing || hasPendingTrade}
+        />
 
         <BetControls
           betAmount={betAmount}

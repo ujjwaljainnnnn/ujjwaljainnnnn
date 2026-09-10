@@ -8,7 +8,7 @@ import CopilotPanel from "@/components/CopilotPanel";
 import ToastStack, { ToastMessage } from "@/components/Toast";
 import { useBinanceKlines } from "@/lib/useBinanceKlines";
 import { analyzeChart } from "@/lib/api";
-import type { AnalysisResult, DemoTrade } from "@/lib/types";
+import type { AIProvider, AnalysisResult, DemoTrade } from "@/lib/types";
 import { formatUsd, formatPrice } from "@/lib/utils";
 
 const SYMBOL = "BTCUSDT";
@@ -22,6 +22,7 @@ export default function Home() {
   const [balance, setBalance] = useState(STARTING_BALANCE);
   const [betAmount, setBetAmount] = useState(10);
   const [payoutPct, setPayoutPct] = useState(80);
+  const [provider, setProvider] = useState<AIProvider>("anthropic");
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [activeTrade, setActiveTrade] = useState<DemoTrade | null>(null);
@@ -51,6 +52,7 @@ export default function Home() {
           candles: snapshot,
           bet_amount: betAmount,
           payout_pct: payoutPct,
+          provider,
         }),
         new Promise((resolve) => setTimeout(resolve, 1400)), // let the scan animation play out
       ]);
@@ -65,7 +67,7 @@ export default function Home() {
     } finally {
       setAnalyzing(false);
     }
-  }, [betAmount, payoutPct, candlesRef, pushToast]);
+  }, [betAmount, payoutPct, provider, candlesRef, pushToast]);
 
   const handleExecuteTrade = useCallback(() => {
     if (!result || result.direction === "NEUTRAL" || lastPrice == null) return;
@@ -154,6 +156,8 @@ export default function Home() {
             onBetAmountChange={setBetAmount}
             payoutPct={payoutPct}
             onPayoutPctChange={setPayoutPct}
+            provider={provider}
+            onProviderChange={setProvider}
             analyzing={analyzing}
             onAnalyze={handleAnalyze}
             result={result}
