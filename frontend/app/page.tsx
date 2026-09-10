@@ -4,9 +4,12 @@ import { useCallback, useState } from "react";
 import Navbar from "@/components/Navbar";
 import TradingChart from "@/components/TradingChart";
 import ScanningOverlay from "@/components/ScanningOverlay";
+import ChartEmptyState from "@/components/ChartEmptyState";
+import MarketStatsBar from "@/components/MarketStatsBar";
 import CopilotPanel from "@/components/CopilotPanel";
 import ToastStack, { ToastMessage } from "@/components/Toast";
 import { useBinanceKlines } from "@/lib/useBinanceKlines";
+import { useBinanceTicker } from "@/lib/useBinanceTicker";
 import { analyzeChart } from "@/lib/api";
 import type { AIProvider, AnalysisResult, DemoTrade } from "@/lib/types";
 import { formatUsd, formatPrice } from "@/lib/utils";
@@ -18,6 +21,7 @@ const STARTING_BALANCE = 10_000;
 
 export default function Home() {
   const { candles, status, lastPrice, candlesRef } = useBinanceKlines(SYMBOL, INTERVAL);
+  const tickerStats = useBinanceTicker(SYMBOL);
 
   const [balance, setBalance] = useState(STARTING_BALANCE);
   const [betAmount, setBetAmount] = useState(10);
@@ -27,6 +31,8 @@ export default function Home() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [activeTrade, setActiveTrade] = useState<DemoTrade | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [tradesCount, setTradesCount] = useState(0);
+  const [winsCount, setWinsCount] = useState(0);
 
   const pushToast = useCallback((toast: Omit<ToastMessage, "id">) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -106,6 +112,8 @@ export default function Home() {
       if (won) {
         setBalance((b) => b + trade.betAmount + payout);
       }
+      setTradesCount((c) => c + 1);
+      if (won) setWinsCount((c) => c + 1);
       setActiveTrade((current) =>
         current && current.id === trade.id
           ? { ...current, status: won ? "won" : "lost", exitPrice, pnl }
@@ -132,17 +140,14 @@ export default function Home() {
       <Navbar balance={balance} connectionStatus={status} />
 
       <main className="flex flex-1 overflow-hidden">
-        <section className="relative w-full p-4 lg:w-[65%]">
-          <div className="glass-panel relative h-full overflow-hidden p-2">
+        <section className="flex w-full flex-col gap-3 p-4 lg:w-[65%]">
+          <MarketStatsBar symbol={SYMBOL} stats={tickerStats} />
+
+          <div className="glass-panel relative min-h-0 flex-1 overflow-hidden p-2">
             <ScanningOverlay active={analyzing} />
+            {candles.length === 0 && <ChartEmptyState status={status} />}
             <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-full border border-white/10 bg-black/50 px-3 py-1.5 backdrop-blur-md">
-              <span className="text-xs font-semibold text-white/80">BTC/USDT</span>
-              <span className="text-xs text-white/40">&middot; 1m</span>
-              {lastPrice != null && (
-                <span className="ml-1 text-xs font-bold text-neon-green">
-                  ${formatPrice(lastPrice)}
-                </span>
-              )}
+              <span className="text-xs font-semibold text-white/80">1m Candles</span>
             </div>
             <TradingChart candles={candles} activeTrade={activeTrade} />
           </div>
@@ -165,6 +170,9 @@ export default function Home() {
             activeTrade={activeTrade}
             lastPrice={lastPrice}
             onExecuteTrade={handleExecuteTrade}
+            sessionPnl={balance - STARTING_BALANCE}
+            tradesCount={tradesCount}
+            winsCount={winsCount}
           />
         </section>
       </main>

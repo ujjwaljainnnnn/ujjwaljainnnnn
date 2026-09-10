@@ -76,18 +76,7 @@ export default function TradingChart({ candles, activeTrade }: TradingChartProps
     candleSeriesRef.current = candleSeries;
     volumeSeriesRef.current = volumeSeries;
 
-    const resizeObserver = new ResizeObserver(() => {
-      if (containerRef.current) {
-        chart.applyOptions({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight,
-        });
-      }
-    });
-    resizeObserver.observe(containerRef.current);
-
     return () => {
-      resizeObserver.disconnect();
       chart.remove();
       chartRef.current = null;
       candleSeriesRef.current = null;

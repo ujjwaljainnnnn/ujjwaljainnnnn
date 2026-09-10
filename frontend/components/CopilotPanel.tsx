@@ -6,6 +6,7 @@ import BetControls from "./BetControls";
 import AnalysisCard from "./AnalysisCard";
 import ActiveTradeCard from "./ActiveTradeCard";
 import ModelSwitcher from "./ModelSwitcher";
+import SessionStats from "./SessionStats";
 import type { AIProvider, AnalysisResult, DemoTrade } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,9 @@ interface CopilotPanelProps {
   activeTrade: DemoTrade | null;
   lastPrice: number | null;
   onExecuteTrade: () => void;
+  sessionPnl: number;
+  tradesCount: number;
+  winsCount: number;
 }
 
 export default function CopilotPanel({
@@ -39,6 +43,9 @@ export default function CopilotPanel({
   activeTrade,
   lastPrice,
   onExecuteTrade,
+  sessionPnl,
+  tradesCount,
+  winsCount,
 }: CopilotPanelProps) {
   const hasPendingTrade = activeTrade?.status === "pending";
 
@@ -46,7 +53,7 @@ export default function CopilotPanel({
     <aside className="flex h-full flex-col gap-5 overflow-y-auto p-5">
       <div className="glass-panel p-5">
         <div className="mb-4 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-neon-purple/15">
+          <div className="icon-badge bg-gradient-to-br from-neon-purple/30 to-neon-blue/20">
             <ScanLine className="h-4 w-4 text-neon-purple" />
           </div>
           <h2 className="text-sm font-semibold tracking-tight">AI Copilot Console</h2>
@@ -133,6 +140,10 @@ export default function CopilotPanel({
             </motion.button>
           )}
         </>
+      )}
+
+      {!result && !hasPendingTrade && (
+        <SessionStats sessionPnl={sessionPnl} tradesCount={tradesCount} winsCount={winsCount} />
       )}
     </aside>
   );

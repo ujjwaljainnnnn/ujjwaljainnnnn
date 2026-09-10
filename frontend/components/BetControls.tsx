@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { DollarSign, Percent } from "lucide-react";
 
 interface BetControlsProps {
@@ -8,6 +9,11 @@ interface BetControlsProps {
   payoutPct: number;
   onPayoutPctChange: (value: number) => void;
   disabled?: boolean;
+}
+
+function fillStyle(value: number, min: number, max: number): CSSProperties {
+  const pct = ((value - min) / (max - min)) * 100;
+  return { "--range-fill": `${pct}%` } as CSSProperties;
 }
 
 export default function BetControls({
@@ -25,7 +31,7 @@ export default function BetControls({
             <DollarSign className="h-3.5 w-3.5" />
             Bet Amount
           </label>
-          <span className="rounded-md bg-white/5 px-2 py-0.5 text-sm font-bold text-white">
+          <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-0.5 text-sm font-bold text-white shadow-[0_0_10px_rgba(139,92,246,0.15)]">
             ${betAmount}
           </span>
         </div>
@@ -37,6 +43,7 @@ export default function BetControls({
           value={betAmount}
           disabled={disabled}
           onChange={(e) => onBetAmountChange(Number(e.target.value))}
+          style={fillStyle(betAmount, 1, 500)}
           className="w-full disabled:opacity-40"
         />
         <div className="mt-1 flex justify-between text-[10px] text-white/30">
@@ -51,7 +58,7 @@ export default function BetControls({
             <Percent className="h-3.5 w-3.5" />
             Simulated Payout
           </label>
-          <span className="rounded-md bg-white/5 px-2 py-0.5 text-sm font-bold text-white">
+          <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-0.5 text-sm font-bold text-white shadow-[0_0_10px_rgba(139,92,246,0.15)]">
             {payoutPct}%
           </span>
         </div>
@@ -63,6 +70,7 @@ export default function BetControls({
           value={payoutPct}
           disabled={disabled}
           onChange={(e) => onPayoutPctChange(Number(e.target.value))}
+          style={fillStyle(payoutPct, 70, 95)}
           className="w-full disabled:opacity-40"
         />
         <div className="mt-1 flex justify-between text-[10px] text-white/30">

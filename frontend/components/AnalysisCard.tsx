@@ -25,10 +25,19 @@ export default function AnalysisCard({ result }: AnalysisCardProps) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 24 }}
       className={cn(
-        "glass-panel space-y-4 p-5",
+        "glass-panel glass-panel-hover space-y-4 overflow-hidden p-5",
         result.is_positive_ev ? "border-neon-green/30" : "border-neon-red/30"
       )}
     >
+      <div
+        className={cn(
+          "absolute inset-x-0 top-0 h-0.5",
+          result.is_positive_ev
+            ? "bg-gradient-to-r from-transparent via-neon-green to-transparent"
+            : "bg-gradient-to-r from-transparent via-neon-red to-transparent"
+        )}
+      />
+
       <div className="flex items-center justify-between">
         <div className={cn("flex items-center gap-2 font-bold", dir.color)}>
           <Icon className="h-5 w-5" />
@@ -59,7 +68,7 @@ export default function AnalysisCard({ result }: AnalysisCardProps) {
           <p className="text-[10px] uppercase tracking-wider text-white/40">Expected Value</p>
           <p
             className={cn(
-              "text-xl font-bold",
+              "text-2xl font-bold tabular-nums",
               result.is_positive_ev ? "neon-text-green" : "neon-text-red"
             )}
           >
@@ -70,7 +79,7 @@ export default function AnalysisCard({ result }: AnalysisCardProps) {
           <p className="text-[10px] uppercase tracking-wider text-white/40">EV per $1</p>
           <p
             className={cn(
-              "text-xl font-bold",
+              "text-2xl font-bold tabular-nums",
               result.is_positive_ev ? "text-neon-green" : "text-neon-red"
             )}
           >

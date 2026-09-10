@@ -34,14 +34,35 @@ export default function ActiveTradeCard({ trade, currentPrice }: ActiveTradeCard
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-panel space-y-3 border-neon-purple/30 p-5"
+      className={cn(
+        "glass-panel space-y-3 overflow-hidden p-5",
+        isWinningNow ? "border-neon-green/30" : "border-neon-red/30"
+      )}
     >
+      <motion.div
+        className={cn(
+          "absolute inset-0 -z-10",
+          isWinningNow ? "bg-neon-green/[0.04]" : "bg-neon-red/[0.04]"
+        )}
+        animate={{ opacity: [0.4, 1, 0.4] }}
+        transition={{ duration: 1.6, repeat: Infinity }}
+      />
+
       <div className="flex items-center justify-between">
         <div className={cn("flex items-center gap-2 font-bold", isUp ? "text-neon-green" : "text-neon-red")}>
+          <span className="relative flex h-2 w-2">
+            <span
+              className={cn(
+                "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
+                isUp ? "bg-neon-green" : "bg-neon-red"
+              )}
+            />
+            <span className={cn("relative inline-flex h-2 w-2 rounded-full", isUp ? "bg-neon-green" : "bg-neon-red")} />
+          </span>
           <Icon className="h-4 w-4" />
           <span className="text-sm">Demo Trade Live &middot; {trade.direction}</span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-white/50">
+        <div className="flex items-center gap-1 text-xs font-semibold text-white/60">
           <Timer className="h-3.5 w-3.5" />
           {remainingSec}s
         </div>
@@ -54,14 +75,18 @@ export default function ActiveTradeCard({ trade, currentPrice }: ActiveTradeCard
         />
       </div>
 
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-white/50">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-white/50">
           Entry: <span className="font-semibold text-white/80">${formatPrice(trade.entryPrice)}</span>
         </span>
-        <span className={cn("font-semibold", isWinningNow ? "text-neon-green" : "text-neon-red")}>
+        <span className={cn("text-lg font-bold tabular-nums", isWinningNow ? "neon-text-green" : "neon-text-red")}>
           {currentPrice != null ? `$${formatPrice(currentPrice)}` : "—"}
         </span>
       </div>
+
+      <p className={cn("text-center text-[11px] font-medium", isWinningNow ? "text-neon-green" : "text-neon-red")}>
+        {isWinningNow ? "Currently tracking a win" : "Currently tracking a loss"}
+      </p>
     </motion.div>
   );
 }
